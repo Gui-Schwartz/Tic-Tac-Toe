@@ -1,0 +1,49 @@
+body {
+    background-image: url('almir.jpg');
+    background-size: cover;         /* Faz a imagem cobrir toda a tela */
+    background-repeat: no-repeat;   /* Evita que a imagem fique se repetindo */
+    background-position: top ;    /* Centraliza a imagem */
+}
+main {
+    width: 90%;
+    height: 250px;
+    max-width: 500px;
+    margin: 0 auto; /* centraliza horizontal */
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8); /* tom claro com transparência */
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    text-align: center;
+    margin-bottom: 15px;
+}
+#play {
+    margin-top: 20px;     /* Espaço acima do botão */
+}
+#jogada {
+    margin-bottom: 35px;  /* Espaço abaixo do input */
+}
+
+#tabuleiro {
+    display: grid;
+    grid-template-columns: repeat(3, 30px); 
+    grid-template-rows: repeat(3, 30px);    
+    gap: 5px;
+    justify-content: center;                 
+    margin-top: 40px;
+  }
+
+
+  
+  #tabuleiro button {
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .restart-button {
+    background-color: blue;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
