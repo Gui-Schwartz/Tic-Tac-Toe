@@ -1,17 +1,98 @@
-const countDisplay = document.getElementById("count");
+class GameManager {
+     static count = 0;
+    
+     createNewGame(){
+        const games  = document.createElement("div");
+        
+        const newGameContainer = document.createElement("div");
+        newGameContainer.classList.add("game-container");
 
-const tabuleiro = document.getElementById("tabuleiro")                                            
+        const newGame1 = new JogoDaVelha();
+        
+        this.count = 0;
+        
+        const tabuleiro = document.createElement("div");                                            
+        
+        tabuleiro.classList.add("tabuleiro");
+        tabuleiro.style.display = "grid";
+        tabuleiro.style.gridTemplateColumns = "repeat(3, 40px)";
+        tabuleiro.style.gridGap = "7px";
+        tabuleiro.style.margin = "auto";
+        tabuleiro.style.width = "max-content";
+        
+        const countDisplay = document.createElement("div")
+        countDisplay.textContent = `Rodadas: ${this.count}` 
+        countDisplay.style.gridGap = "7px";
+        countDisplay.style.margin = "auto";
+        countDisplay.style.width = "max-content";
+        countDisplay.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+        countDisplay.style.color = "black";
+        countDisplay.style.border = "none";
+        countDisplay.style.padding = "10px 20px";
 
-let count = 0;
-   
+        for(let i =0; i < 9; i++){
+            if(this.count < 9){
+                const btn = document.createElement("button");
+                btn.dataset.index = i;                                          //atribui o elemento data-index com o valor de i ao botão que foi criado, assim tem como rastrear o botão 
+                btn.innerText = "";                                      
+                btn.style.width = "30px";
+                btn.style.height = "30px";
+                btn.style.fontSize = "20px";
+                btn.style.cursor = "pointer";           
+                
+                btn.addEventListener("click", (e)=>{
+                    const index = e.target.dataset.index;
+                    const x = Math.floor(index/3);
+                    const y = index % 3;
+                    
+                    this.count++;
+                    countDisplay.textContent = `Rodada: ${this.count}`
+                    
+                    if(newGame1.jogoEncerrado){                                       //confere se o jogo finalizou, caso seja verdadeiro imprime a mensagem de jogo de fim de jogo 
+                        alert("jogo finalizado por favor reinicie para seguir")
+                        return;
+                       };
+    
+                       try {
+                        newGame1.jogar(x, y);
+                        e.target.innerText = newGame1.tabuleiro[x][y];
+                        newGame1.winGame(this.count);
+                        countDisplay.textContent = `Rodada: ${this.count}`
+                     }catch (error){   
+                        console.log(error)
+                        alert ("InvalidOperationException: Posição já ocupada")
+                        new InvalidOperationException("Posição ja ocupada ");
+                     }
+                }
+            )
+            tabuleiro.appendChild(btn);                                       //adiciona os botões a um grupo de elementos 
+        }
+           
+        newGameContainer.appendChild(tabuleiro);
+        newGameContainer.appendChild(countDisplay);
+        document.getElementById("main-container").appendChild(newGameContainer);
+
+    }
+}
+}
+
 const addElement =()=>{                                                                            //Cria o botão Restart dinamicamente e seta as características do HTML e
     const resetBtn  = document.createElement("button");
+    const newGameBtn = document.createElement("button");
+
+    newGameBtn.innerText = "New Game"
+    newGameBtn.id = "new-game-button"
+    newGameBtn.addEventListener("click", ()=>{
+        const game = new GameManager()
+        game.createNewGame();
+    })
     resetBtn.innerText = "Restart";
     resetBtn.id = "restart-button";
     resetBtn.addEventListener("click",()=>{
         location.reload();
     })
     document.body.appendChild(resetBtn);                                                           //Insere o botão reset dentro do elemento body do html
+    document.body.appendChild(newGameBtn)
 
     resetBtn.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
     resetBtn.style.color = "black";
@@ -25,22 +106,28 @@ const addElement =()=>{                                                         
     resetBtn.style.display = "block";
     resetBtn.style.marginLeft = "auto";
     resetBtn.style.marginRight = "auto";
+
+    newGameBtn.style.backgroundColor = "rgba(255, 255, 255, 0.8)";
+    newGameBtn.style.color = "black";
+    newGameBtn.style.border = "none";
+    newGameBtn.style.padding = "10px 20px";
+    newGameBtn.style.borderRadius = "8px";
+    newGameBtn.style.fontSize = "16px";
+    newGameBtn.style.cursor = "pointer";
+    newGameBtn.style.textAlign = "center";
+    newGameBtn.style.margin = "20px auto 15px auto"
+    newGameBtn.style.display = "block";
+    newGameBtn.style.marginLeft = "auto";
+    newGameBtn.style.marginRight = "auto";
 }
 document.body.onload = addElement;                                                                  // carrega um elemento body quando a página é aberta
-
-const round = () => {                                                                               //função que conta as rodadas e limita caso o jogo acabe e limita a 9 rodadas(número máximo de jogadas)
-        if(count < 9){
-            count ++;
-            countDisplay.textContent = count;
-    }
-}
-
 
 class ObterVencedor {                                                                               //Classe que confere se algumas das 8 posições vencedoras são verdadeiras (tem o mesmo caractere entre uma delas)
     constructor(tabuleiro){
             this.tabuleiro = tabuleiro    
         }
-        verificador(){
+        verificador(count){
+            
             const t = this.tabuleiro
                 
             if(t[0][0] !== "" && t[0][0] === t[0][1] && t[0][1] === t[0][2]){
@@ -82,7 +169,6 @@ class ObterVencedor {                                                           
     }
 }
 
-
 class InvalidOperationException extends Error{                                                        //Classe que gera a mensagem de erro de posição ocupada
     constructor(message){
         super(message);
@@ -109,7 +195,9 @@ class JogoDaVelha{
         this.vezO = "O";
         this.jogoEncerrado = false;
         }
+
         jogar(x, y){                                                                                 //Classe jogar, que confere se as cordenadas estão dentro do correto
+            console.log(this.tabuleiro)
             if(x > 2 || x < 0 || y > 2 || y < 0){                                                    
                 throw new ArgumentOutOfRangeException("O range de escolha é entre 0 e 2")  
 
@@ -117,75 +205,19 @@ class JogoDaVelha{
                 this.tabuleiro[x][y] = this.vez;
                 this.alternaVez();
 
-            }else {
+            }else{
                 throw new InvalidOperationException("Posição ja ocupada ");
             }
         }
         alternaVez(){                                                                             //Troca a vez do jogador entre X e O usando o operador ternário
             this.vez = (this.vez === "X") ? "O" : "X";
         }
-        winGame(){                                                            //Classe verificadora que chama a função que confere as posições vencedoras
-            const verifica = new ObterVencedor(this.tabuleiro);                  
-            if(count >3){
-                const resultado = verifica.verificador()
-                if (verifica.verificador()) {                                 //Confere se teve algum vencedor ou encontrou um empate e troca altera o valor booleano de jogoEncerrado
+        winGame(count){                                                            //Classe verificadora que chama a função que confere as posições vencedoras
+            const verifica = new ObterVencedor(this.tabuleiro);                      
+            
+            const resultado = verifica.verificador(count)
+                if (resultado) {                                 //Confere se teve algum vencedor ou encontrou um empate e troca altera o valor booleano de jogoEncerrado
                     this.jogoEncerrado = true;
                 }
-            }
          }
-    }           
-
-const jogo = new JogoDaVelha();
-
-
-
-const buttons = () => {
-    const btnGroup = document.createElement("div");                         //cria um elemento div que agrupa os botões dentro dele
-    
-    for(let i =0; i < 9; i++){
-        if(count < 9){
-            const btn = document.createElement("button");
-            btn.dataset.index = i;                                          //atribui o elemento data-index com o valor de i ao botão que foi criado, assim tem como rastrear o botão 
-            btn.innerText = "";                                      
-            btnGroup.style.display = "grid";                                //cria dinamicamente o css do botão
-            btnGroup.style.gridTemplateColumns = "repeat(3, 40px)";
-            btnGroup.style.gridGap = "7px";
-            btnGroup.style.margin = "auto"; 
-            btnGroup.style.width = "max-content";
-            btn.style.width = "30px";
-            btn.style.height = "30px";
-            btn.style.fontSize = "20px";
-            btn.style.cursor = "pointer";           
-            btnGroup.appendChild(btn);                                       //adiciona os botões a um grupo de elementos 
-        }
     }
-    btnGroup.addEventListener("click", (e) => {
-        if(jogo.jogoEncerrado){                                       //confere se o jogo finalizou, caso seja verdadeiro imprime a mensagem de jogo de fim de jogo 
-         alert("jogo finalizado por favor reinicie para seguir")
-         return;
-        };
-        
-        const index = e.target.dataset.index;                        //rastreia o index do botão criado/clicado e atribui a index 
-        const x = Math.floor(index /3);                               //calcula as posições de X baseado no loop
-        const y = index % 3;                                          //calcula as posições de Y baseado no loop
-        console.log(index)                                            //mostra os index dos botões
-         
-        try {
-            jogo.jogar(x, y);
-            e.target.innerText = jogo.tabuleiro[x][y];
-            jogo.winGame();
-            round()
-         }catch (error){   
-            alert("InvalidOperationException: Posição já ocupada")
-            InvalidOperationException("Posição ja ocupada ");
-         }
-     }); 
-
-
-    tabuleiro.appendChild(btnGroup);                                         //Adiciona o grupo de botões aos elementos 
-}
-buttons();
-
-
-//fazer o append fora do elemento for, rodar o event listener para uma lista de botões criar a lista de botões como loop for e após isso rodar o event listener para essa lista |feito|
-//ter dois append child um no inicio do lop para uma lista "temporaria" e um segundo para a lista final atualizar o browser |feito |
